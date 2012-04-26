@@ -1,0 +1,24 @@
+<configure xmlns="http://namespaces.zope.org/zope"
+           xmlns:zcml="http://namespaces.zope.org/zcml"
+           xmlns:grok="http://namespaces.zope.org/grok"
+           xmlns:browser="http://namespaces.zope.org/browser"
+           xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+           xmlns:i18n="http://namespaces.zope.org/i18n"
+           i18n_domain="collective.zamqpdemos">
+
+    <includeDependencies package="." />
+    <grok:grok package="." />
+
+    <!-- <i18n:registerTranslations directory="locales" /> -->
+
+    <genericsetup:registerProfile
+        name="default"
+        title="AMQP-demos"
+        directory="profiles/default"
+        description="Installs various examples using collective.zamqp."
+        for="Products.CMFPlone.interfaces.IPloneSiteRoot"
+        provides="Products.GenericSetup.interfaces.EXTENSION"
+        i18n:attributes="title description"
+        />
+
+</configure>

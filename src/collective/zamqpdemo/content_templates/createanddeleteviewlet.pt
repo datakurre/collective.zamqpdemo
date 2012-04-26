@@ -1,0 +1,20 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      lang="en"
+      i18n:domain="collective.zamqpdemo" tal:omit-tag="">
+<body tal:omit-tag="">
+
+<dl class="portalMessage info">
+  <dt i18n:domain="plone" i18n:translate="">Info</dt>
+  <dd i18n:translate="">
+      Call
+      <a tal:attributes="href string:${context/absolute_url}/@@create-and-delete"
+         i18n:name="link">@@create-and-delete</a>
+      for this container to initiate an AMQP-sequence.
+  </dd>
+</dl>
+
+</body>
+</html>
