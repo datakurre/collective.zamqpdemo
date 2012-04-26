@@ -101,7 +101,7 @@ class DeleteItemConsumer(Consumer):
     serializer = "msgpack"
 
     auto_declare = True
-    durable = False
+    durable = True
 
     marker = IDeleteItemMessage
 
