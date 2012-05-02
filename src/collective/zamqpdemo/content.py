@@ -123,6 +123,25 @@ class CreateAndDelete(grok.View):
 
         title = str(uuid.uuid4())
 
+        kwargs = {
+            "title": title
+            }
+        producer.publish(kwargs, correlation_id=IUUID(self.context))
+
+        self.request.response.redirect(self.context.absolute_url())
+
+
+class CreateRandomAndDelete(grok.View):
+    """Item creation request view"""
+    grok.context(IContainer)
+    grok.name("create-random-and-delete")
+
+    def render(self):
+        producer = getUtility(IProducer, name="collective.zamqpdemo.create")
+        producer._register()
+
+        title = str(uuid.uuid4())
+
         for i in range(random.randint(1, 5)):
             kwargs = {
                 "title": "%s-%s" % (title, i + 1)
