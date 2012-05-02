@@ -55,7 +55,7 @@ class CreateItemProducer(Producer):
     serializer = "msgpack"
 
     auto_declare = True
-    durable = True
+    durable = False
 
 
 class DeleteItemProducer(Producer):
@@ -69,7 +69,7 @@ class DeleteItemProducer(Producer):
     serializer = "msgpack"
 
     auto_declare = True
-    durable = True
+    durable = False
 
 
 class CreateItemConsumer(Consumer):
@@ -84,7 +84,7 @@ class CreateItemConsumer(Consumer):
     serializer = "msgpack"
 
     auto_declare = True
-    durable = True
+    durable = False
 
     marker = ICreateItemMessage
 
@@ -101,7 +101,7 @@ class DeleteItemConsumer(Consumer):
     serializer = "msgpack"
 
     auto_declare = True
-    durable = True
+    durable = False
 
     marker = IDeleteItemMessage
 
