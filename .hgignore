@@ -13,5 +13,3 @@ develop-eggs
 var
 .installed.cfg
 .mr.developer.cfg
-
-src/collective.zamqp
