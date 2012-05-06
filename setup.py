@@ -5,7 +5,7 @@ version = "1.0.0"
 setup(name="collective.zamqpdemo",
       version=version,
       description="Various examples using collective.zamqp",
-      long_description=open("README.txt").read() + "\n" +
+      long_description=open("README.rst").read() + "\n" +
                        open("HISTORY.txt").read(),
       # Get more strings from
       # http://pypi.python.org/pypi?%3Aaction=list_classifiers
