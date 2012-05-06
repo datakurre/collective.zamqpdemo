@@ -84,8 +84,8 @@ class MinutesProducer(Producer):
     routing_key = "amqpdemo.minutes"
     serializer = "text/plain"
 
-    auto_declare = False # exchange must be declared
-    durable = True  # produced messages should be persistent
+    auto_declare = True  # exchange must be declared
+    durable = False
 
 
 class MinutesConsumer(Consumer):
@@ -95,12 +95,10 @@ class MinutesConsumer(Consumer):
     connection_id = "amqpdemo"
 
     exchange = "amqpdemo"
-    exchange_durable = False
-
     queue = "amqpdemo.minutes"
 
     auto_declare = True  # queue must be declared
-    durable = True # declared queue should be durable
+    durable = False
 
     marker = IMinutesMessage
 
