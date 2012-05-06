@@ -27,8 +27,12 @@ setup(name="collective.zamqpdemo",
           "five.grok",
           "plone.app.dexterity",
           "plone.app.referenceablebehavior",
+
           "collective.zamqp",
           "msgpack-python",
+
+          "xhtml2pdf",
+          "chameleon",
       ],
       extras_require={
       },

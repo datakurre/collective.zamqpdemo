@@ -2,5 +2,6 @@
 <object name="portal_types">
   <object name="collective.zamqpdemo.container" meta_type="Dexterity FTI" />
   <object name="collective.zamqpdemo.item" meta_type="Dexterity FTI" />
+  <object name="collective.zamqpdemo.minutes" meta_type="Dexterity FTI" />
 </object>
 

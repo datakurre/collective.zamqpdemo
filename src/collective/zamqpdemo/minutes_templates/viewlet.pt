@@ -1,0 +1,38 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      lang="en"
+      i18n:domain="amqpdemo" tal:omit-tag="">
+<body tal:omit-tag="">
+
+<dl class="portalMessage info" tal:condition="context/deliverable">
+  <dt i18n:domain="plone" i18n:translate="">Info</dt>
+  <dd>
+      <a tal:attributes="href string:${context/absolute_url}/@@download/deliverable/${context/deliverable/filename}" i18n:translate="">Click here to download a printable PDF version of these minutes.</a>
+  </dd>
+</dl>
+
+<script tal:condition="not:context/deliverable">
+jQuery(function($) {
+  var url = $("base").attr("href") + "/@@ajaxview?" + (new Date()).getTime();
+  var poll = function() {
+    $.get(url, function(data) {
+      data = data.replace(/^\s+|\s+$/g, '');
+      if (data.length > 0) {
+        $(data)
+          .insertAfter("dl.portalMessage:visible:last")
+          .fadeOut(0).fadeIn(1000, function() {
+            $("dl.portalMessage:visible").not(":last").hide();
+          });
+      } else {
+        window.setTimeout(poll, 1000);
+      }
+    });
+  };
+  window.setTimeout(poll, 1000);
+});
+</script>
+
+</body>
+</html>

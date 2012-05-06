@@ -1,0 +1,17 @@
+syntax: glob
+
+dist
+*.egg-info
+*.pyc
+*.mo
+*~
+.DS_Store
+
+bin
+parts
+develop-eggs
+var
+.installed.cfg
+.mr.developer.cfg
+
+src/collective.zamqp

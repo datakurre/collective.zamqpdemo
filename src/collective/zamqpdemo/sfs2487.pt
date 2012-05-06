@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:pdf="http://www.xhtml2pdf.com/pdf"
+      tal:define="H python:297; W python:210; C python:22.86; R python:4.23;">
+<head>
+  <title></title>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+  <style>
+  /* For help, see: http://xhtml2pdf.appspot.com/static/pisa-en.html */
+  @page {
+
+    /* Static PDF-frames */
+    @frame { -pdf-frame-content: header-column-0; top: 10mm; left: 20mm; }
+    @frame { -pdf-frame-content: header-column-4; top: 10mm;
+             left: <tal:replace replace="python:20+C*4" />mm; }
+    @frame { -pdf-frame-content: header-column-7; top: 10mm;
+             left: <tal:replace replace="python:20+C*7" />mm; }
+    @frame { -pdf-frame-content: footer-column-0;
+             top: <tal:replace replace="python:H-(10+R*4)" />mm;
+             left: 20mm; right: 10mm; }
+    @frame { -pdf-frame-content: footer-column-2;
+             top: <tal:replace replace="python:H-(10+R*4)" />mm;
+             left: <tal:replace replace="python:20+C*2" />mm; right: 10mm; }
+    @frame { -pdf-frame-content: footer-column-4;
+             top: <tal:replace replace="python:H-(10+R*4)" />mm;
+             left: <tal:replace replace="python:20+C*4" />mm; right: 10mm; }
+    @frame { -pdf-frame-content: footer-column-6;
+             top: <tal:replace replace="python:H-(10+R*4)" />mm;
+             left: <tal:replace replace="python:20+C*6" />mm; right: 10mm; }
+
+    size: a4;
+
+    margin-left: <tal:replace replace="python:20+C*2" />mm;
+    margin-top: <tal:replace replace="python:10+R*7" />mm;
+    margin-bottom: <tal:replace replace="python:10+R*7" />mm;
+    margin-right: 10mm;
+  }
+
+  /* http://meyerweb.com/eric/tools/css/reset/
+     v2.0 | 20110126 | License: none (public domain) */
+  html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p,
+  blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em,
+  img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i,
+  center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table,
+  caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details,
+  embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby,
+  section, summary, time, mark, audio, video { margin: 0; padding: 0; border:
+  0; font-size: 100%; font: inherit; vertical-align: baseline; }
+  /* HTML5 display-role reset for older browsers */
+  article, aside, details, figcaption, figure,
+  footer, header, hgroup, menu, nav, section { display: block; }
+  body { line-height: <tal:replace replace="python:R*1" />mm; }
+  ol, ul { list-style: none; }
+  blockquote, q { quotes: none; }
+  blockquote:before, blockquote:after,
+  q:before, q:after { content: ''; content: none; }
+  table { border-collapse: collapse; border-spacing: 0; }
+  /* reset ends */
+
+  body { font-size: 11pt; font-family: serif; }
+  h1, h2, h3 { margin-left: -<tal:replace replace="python:C*2" />mm; }
+  h1 { font-size: 12pt;
+       padding-top: <tal:replace replace="python:R*2" />mm;
+       margin-bottom: <tal:replace replace="python:R*2" />mm; }
+  h2, h3 { margin-top: <tal:replace replace="python:R*1" />mm; }
+
+  /* align the first line of the content with the heading */
+  h2, h3 { margin-bottom: -<tal:replace replace="python:R*1" />mm; }
+  p { margin-top: -<tal:replace replace="python:R*3" />mm; }
+
+  p, ul, ol, table { margin-bottom: <tal:replace replace="python:R*1" />mm; }
+
+  ul { margin-left: 0.85em; }
+  ul li { list-style-image: url("data:image/gif;base64,R0lGODlhCQAKAIAAAP///wAAACH5BAEAAAAALAAAAAAJAAoAAAIKhI+py+0BY3B0FQA7AA=="); }
+
+  table th { text-align: left; font-weight: bold; }
+  table td { padding-top: <tal:replace replace="python:R*0.25" />mm; }
+  table td, table th { vertical-align: top; }
+  table thead th { border-bottom: 0.5pt solid black; }
+  table tfoot th { border-top: 0.5pt solid black; font-weight: bold;
+                   padding-top: <tal:replace replace="python:R*0.25" />mm; }
+
+  hr { height: 0.5pt; }
+
+  .header img { height: <tal:replace replace="python:R*6" />mm; }
+  .hairline { border-top: 0.5pt solid black; }
+  .footer { padding-top: <tal:replace replace="python:R*1" />mm; }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div id="header-column-0" class="header">
+  <strong>${author}</strong><br/>
+  ${email}
+</div>
+<div id="header-column-4" class="header">
+  <strong>Minutes</strong><br/>
+  <br/>
+  <br/>
+  ${date}
+</div>
+<div id="header-column-7" class="header">
+  <pdf:pagenumber/>
+</div>
+
+<h1>${title}</h1>
+
+<tal:body replace="structure body"/>
+
+<!-- Footer -->
+<div id="footer-column-0" class="footer hairline">
+  ${site}<br/>
+</div>
+<div id="footer-column-2" class="footer">
+  <br/>
+  <br/>
+</div>
+<div id="footer-column-6" class="footer">
+  <br/>
+  <br/>
+</div>
+
+</body>
+</html>
