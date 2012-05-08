@@ -1,0 +1,106 @@
+[Workflow],,,,,,,,,
+Id:,simple_auto_publishing_workflow,,,,,,,,
+Title:,Simple Auto Publishing Workflow,,,,,,,,
+Description:,"- Simple workflow that is useful for basic web sites. - Things start out as private, and can either be submitted for review, or published directly. - The creator of a content item can edit the item even after it is published.",,,,,,,,
+Initial state:,private,,,,,,,,
+Type:,Workflow,,,,,,,,
+State variable:,review_state,,,,,,,,
+,,,,,,,,,
+[State],,,,,,,,,
+Id:,pending,,,,,,,,
+Title:,Pending review,,,,,,,,
+Description:,"Waiting to be reviewed, not editable by the owner.",,,,,,,,
+Transitions,"make_private, auto_publish, publish, reject, retract",,,,,,,,
+Worklist:,Reviewer tasks,,,,,,,,
+Worklist label:,Pending (%(count)d),,,,,,,,
+Worklist guard permission:,Review portal content,,,,,,,,
+Worklist guard role:,,,,,,,,,
+Worklist guard expression:,,,,,,,,,
+Permissions,Acquire,Anonymous,Manager,Owner,Reader,Editor,Contributor,Reviewer,Site Administrator
+Access contents information,N,N,Y,Y,Y,Y,Y,Y,Y
+View,N,N,Y,Y,Y,Y,Y,Y,Y
+Modify portal content,N,N,Y,N,N,N,N,Y,Y
+Change portal events,N,N,Y,N,N,N,N,Y,Y
+,,,,,,,,,
+[State],,,,,,,,,
+Id:,auto_publishing,,,,,,,,
+Title:,Publishing,,,,,,,,
+Description:,"Waiting to be published, not editable by the owner.",,,,,,,,
+Transitions,"make_private, publish, reject, retract",,,,,,,,
+Permissions,Acquire,Anonymous,Manager,Owner,Reader,Editor,Contributor,Reviewer,Site Administrator
+Access contents information,N,N,Y,Y,Y,Y,Y,Y,Y
+View,N,N,Y,Y,Y,Y,Y,Y,Y
+Modify portal content,N,N,Y,N,N,N,N,Y,Y
+Change portal events,N,N,Y,N,N,N,N,Y,Y
+,,,,,,,,,
+[State],,,,,,,,,
+Id:,private,,,,,,,,
+Title:,Private,,,,,,,,
+Description:,Can only be seen and edited by the owner.,,,,,,,,
+Transitions,"auto_publish, publish, submit",,,,,,,,
+Permissions,Acquire,Anonymous,Manager,Owner,Reader,Editor,Contributor,Reviewer,Site Administrator
+Access contents information,N,N,Y,Y,Y,Y,Y,N,Y
+View,N,N,Y,Y,Y,Y,Y,N,Y
+Modify portal content,N,N,Y,Y,N,Y,N,N,Y
+Change portal events,N,N,Y,Y,N,Y,N,N,Y
+,,,,,,,,,
+[State],,,,,,,,,
+Id:,published,,,,,,,,
+Title:,Published,,,,,,,,
+Description:,"Visible to everyone, not editable by the owner.",,,,,,,,
+Transitions,"retract, reject",,,,,,,,
+Permissions,Acquire,Anonymous,Manager,Owner,Reader,Editor,Contributor,Reviewer,Site Administrator
+Access contents information,N,Y,N,N,N,N,N,N,N
+View,N,Y,N,N,N,N,N,N,N
+Modify portal content,N,N,Y,Y,N,Y,N,N,Y
+Change portal events,N,N,Y,Y,N,Y,N,N,Y
+,,,,,,,,,
+[Transition],,,,,,,,,
+Id:,publish,,,,,,,,
+Title:,Publish,,,,,,,,
+Description:,Reviewer publishes content,,,,,,,,
+Details:,Publishing the item makes it visible to other users.,,,,,,,,
+Target state:,published,,,,,,,,
+URL:,%(content_url)s/content_status_modify?workflow_action=publish,,,,,,,,
+Trigger:,User,,,,,,,,
+Guard permission:,Review portal content,,,,,,,,
+,,,,,,,,,
+[Transition],,,,,,,,,
+Id:,auto_publish,,,,,,,,
+Title:,Schedule,,,,,,,,
+Description:,Auto publishes content when publishing date is met,,,,,,,,
+Details:,Publishing the item makes it visible to other users when the publishing date is met.,,,,,,,,
+Target state:,auto_publishing,,,,,,,,
+URL:,%(content_url)s/content_status_modify?workflow_action=auto_publish,,,,,,,,
+Trigger:,User,,,,,,,,
+Guard permission:,Review portal content,,,,,,,,
+,,,,,,,,,
+[Transition],,,,,,,,,
+Id:,reject,,,,,,,,
+Title:,Send back,,,,,,,,
+Description:,Reviewer send content back for re-drafting,,,,,,,,
+Details:,Sending the item back will return the item to the original author instead of publishing it. You should preferably include a reason for why it was not published.,,,,,,,,
+Target state:,private,,,,,,,,
+URL:,%(content_url)s/content_status_modify?workflow_action=reject,,,,,,,,
+Trigger:,User,,,,,,,,
+Guard permission:,Review portal content,,,,,,,,
+,,,,,,,,,
+[Transition],,,,,,,,,
+Id:,retract,,,,,,,,
+Title:,Retract,,,,,,,,
+Description:,Member retracts submission,,,,,,,,
+Details:,"If you submitted the item by mistake or want to perform additional edits, this will take it back.",,,,,,,,
+Target state:,private,,,,,,,,
+URL:,%(content_url)s/content_status_modify?workflow_action=retract,,,,,,,,
+Trigger:,User,,,,,,,,
+Guard permission:,Request review,,,,,,,,
+,,,,,,,,,
+[Transition],,,,,,,,,
+Id:,submit,,,,,,,,
+Title:,Submit for publication,,,,,,,,
+Description:,Member submits content for publication,,,,,,,,
+Details:,"Puts your item in a review queue, so it can be published on the site.",,,,,,,,
+Target state:,pending,,,,,,,,
+URL:,%(content_url)s/content_status_modify?workflow_action=submit,,,,,,,,
+Trigger:,User,,,,,,,,
+Guard permission:,Request review,,,,,,,,
