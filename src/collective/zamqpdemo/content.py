@@ -25,7 +25,7 @@ from collective.zamqp.producer import Producer
 from collective.zamqp.consumer import Consumer
 
 from zope.i18nmessageid import MessageFactory as ZopeMessageFactory
-_ = ZopeMessageFactory("amqpdemo")
+_ = ZopeMessageFactory("collective.zamqpdemo")
 
 
 class IContainer(form.Schema):
@@ -46,12 +46,10 @@ class IDeleteItemMessage(Interface):
 
 class CreateItemProducer(Producer):
     """Produces item creation requests"""
-    grok.name("collective.zamqpdemo.create")
+    grok.name("amqpdemo.create")  # is also the routing key
 
     connection_id = "amqpdemo"
-
     exchange = "amqpdemo"
-    routing_key = "amqpdemo.create"
     serializer = "msgpack"
 
     auto_declare = True
@@ -60,12 +58,10 @@ class CreateItemProducer(Producer):
 
 class DeleteItemProducer(Producer):
     """Produces item deletion requests"""
-    grok.name("collective.zamqpdemo.delete")
+    grok.name("amqpdemo.delete")  # is also the routing key
 
     connection_id = "amqpdemo"
-
     exchange = "amqpdemo"
-    routing_key = "amqpdemo.delete"
     serializer = "msgpack"
 
     auto_declare = True
@@ -74,14 +70,10 @@ class DeleteItemProducer(Producer):
 
 class CreateItemConsumer(Consumer):
     """Consumes item creation messages"""
-    grok.name("collective.zamqpdemo.create")
+    grok.name("amqpdemo.create")  # is also the queue name
 
     connection_id = "amqpdemo"
-
     exchange = "amqpdemo"
-    queue = "amqpdemo.create"
-    routing_key = "amqpdemo.create"
-    serializer = "msgpack"
 
     auto_declare = True
     durable = False
@@ -91,14 +83,10 @@ class CreateItemConsumer(Consumer):
 
 class DeleteItemConsumer(Consumer):
     """Consumes item deletion messages"""
-    grok.name("collective.zamqpdemo.delete")
+    grok.name("amqpdemo.delete")  # is also the queue name
 
     connection_id = "amqpdemo"
-
     exchange = "amqpdemo"
-    queue = "amqpdemo.delete"
-    routing_key = "amqpdemo.delete"
-    serializer = "msgpack"
 
     auto_declare = True
     durable = False
@@ -118,14 +106,12 @@ class CreateAndDelete(grok.View):
     grok.name("create-and-delete")
 
     def render(self):
-        producer = getUtility(IProducer, name="collective.zamqpdemo.create")
+        producer = getUtility(IProducer, name="amqpdemo.create")
         producer._register()
 
         title = str(uuid.uuid4())
+        kwargs = {"title": title}
 
-        kwargs = {
-            "title": title
-            }
         producer.publish(kwargs, correlation_id=IUUID(self.context))
 
         self.request.response.redirect(self.context.absolute_url())
@@ -137,15 +123,13 @@ class CreateRandomAndDelete(grok.View):
     grok.name("create-random-and-delete")
 
     def render(self):
-        producer = getUtility(IProducer, name="collective.zamqpdemo.create")
+        producer = getUtility(IProducer, name="amqpdemo.create")
         producer._register()
 
         title = str(uuid.uuid4())
 
         for i in range(random.randint(1, 5)):
-            kwargs = {
-                "title": "%s-%s" % (title, i + 1)
-                }
+            kwargs = {"title": "%s-%s" % (title, i + 1)}
             producer.publish(kwargs, correlation_id=IUUID(self.context))
 
         self.request.response.redirect(self.context.absolute_url())
@@ -160,12 +144,10 @@ def createItem(message, event):
 
     obj = createContentInContainer(container, "collective.zamqpdemo.item",
                                    checkConstraints=True, **message.body)
+    kwargs = {"uuid": IUUID(obj)}
 
-    producer = getUtility(IProducer, name="collective.zamqpdemo.delete")
+    producer = getUtility(IProducer, name="amqpdemo.delete")
     producer._register()
-    kwargs = {
-        "uuid": IUUID(obj)
-        }
     producer.publish(kwargs)
 
     message.ack()

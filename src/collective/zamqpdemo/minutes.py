@@ -76,28 +76,24 @@ class Viewlet(grok.Viewlet):
 
 class MinutesProducer(Producer):
     """Produces requests for PDF"""
-    grok.name("collective.zamqpdemo.minutes")
+    grok.name("amqpdemo.minutes")  # is also the routing key
 
     connection_id = "amqpdemo"
-
     exchange = "amqpdemo"
-    routing_key = "amqpdemo.minutes"
     serializer = "text/plain"
 
-    auto_declare = True  # exchange must be declared
+    auto_declare = True
     durable = False
 
 
 class MinutesConsumer(Consumer):
     """Consumes requests for PDF"""
-    grok.name("collective.zamqpdemo.minutes")
+    grok.name("amqpdemo.minutes")  # is also the queue name
 
     connection_id = "amqpdemo"
-
     exchange = "amqpdemo"
-    queue = "amqpdemo.minutes"
 
-    auto_declare = True  # queue must be declared
+    auto_declare = True
     durable = False
 
     marker = IMinutesMessage
@@ -112,7 +108,7 @@ def produceMessage(minutes, event):
     bound.set(minutes, None)
 
     # Get producer and publish the message
-    producer = getUtility(IProducer, name="collective.zamqpdemo.minutes")
+    producer = getUtility(IProducer, name="amqpdemo.minutes")
     producer._register()  # publish only after the transaction has succeeded
     producer.publish("", correlation_id=IUUID(minutes))  # empty message... :)
 
