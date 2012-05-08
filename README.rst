@@ -3,7 +3,7 @@ collective.zamqpdemo
 
 This package contains a few examples of
 configuring and using AMQP-messaging with Plone and
-`collective.zamqp <http://github.com/datakure/collective.zamqp/>`_
+`collective.zamqp <http://github.com/datakurre/collective.zamqp/>`_
 (with and without ZEO-clustering).
 
 After running the buildout, you must start RabbitMQ::
