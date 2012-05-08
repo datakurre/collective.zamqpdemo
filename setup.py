@@ -33,6 +33,8 @@ setup(name="collective.zamqpdemo",
 
           "xhtml2pdf",
           "chameleon",
+
+          "collective.wtf",
       ],
       extras_require={
       },
