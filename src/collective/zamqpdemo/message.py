@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
-"""Test messages with basic_get"""
+"""Tests messaging with basic_get"""
 
 from five import grok
 
 from zope import schema
 from zope.interface import Interface
-from zope.component import getUtility
+from zope.component import getUtility, queryUtility
 
 from z3c.form import button
 from plone.directives import form
 
 from Products.CMFCore.interfaces import ISiteRoot
+from Products.statusmessages.interfaces import IStatusMessage
 
 from collective.zamqp.interfaces import IProducer, IConsumer
 from collective.zamqp.interfaces import IMessageArrivedEvent
@@ -24,13 +25,17 @@ import logging
 logger = logging.getLogger("collective.zamqpdemo")
 
 
+class IPurge(Interface):
+    """Purge command marker interface"""
+
+
 class IMessage(Interface):
     """Message marker interface"""
 
 
-class MessageProducer(Producer):
-    """Produces message"""
-    grok.name("amqpdemo.message")  # is also a routing key
+class QueueMessageProducer(Producer):
+    """Produces queue message command"""
+    grok.name("amqpdemo.queue")
 
     connection_id = "amqpdemo"
     exchange = "amqpdemo"
@@ -39,14 +44,54 @@ class MessageProducer(Producer):
     auto_declare = True
     durable = False
 
+    @property
+    def routing_key(self):
+        site = queryUtility(ISiteRoot)
+        if site:
+            return "amqpdemo.%s.queue" % site.getId()
+        else:
+            return "amqpdemo.queue"
 
-class MessageConsumer(Consumer):
-    """Consumes messages"""
-    grok.name("amqpdemo.${site_id}.message")  # is also the queue name
+
+class PurgeQueueProducer(Producer):
+    """Produces purge queue command"""
+    grok.name("amqpdemo.purge")
 
     connection_id = "amqpdemo"
     exchange = "amqpdemo"
-    routing_key = "amqpdemo.message"
+    serializer = "text/plain"
+
+    auto_declare = True
+    durable = False
+
+    @property
+    def routing_key(self):
+        site = queryUtility(ISiteRoot)
+        if site:
+            return "amqpdemo.%s.purge" % site.getId()
+        else:
+            return "amqpdemo.purge"
+
+
+class PurgeQueueConsumer(Consumer):
+    """Consumes purge-requests"""
+    grok.name("amqpdemo.${site_id}.purge")  # is also the queue name
+
+    connection_id = "amqpdemo"
+    exchange = "amqpdemo"
+
+    auto_declare = True
+    durable = False
+
+    marker = IPurge
+
+
+class MessageConsumer(Consumer):
+    """Consumes purge-requests"""
+    grok.name("amqpdemo.${site_id}.queue")  # is also the queue name
+
+    connection_id = "amqpdemo"
+    exchange = "amqpdemo"
 
     auto_declare = True
     durable = False
@@ -54,10 +99,10 @@ class MessageConsumer(Consumer):
     marker = IMessage
 
     def on_ready_to_consume(self):
-        pass  # disable auto-consuming
+        pass  # overrided to disable auto-consuming
 
 
-class IMessageForm(form.Schema):
+class IQueueForm(form.Schema):
     """Status form schema"""
 
     message = schema.Text(
@@ -70,7 +115,7 @@ class MessageForm(form.SchemaForm):
     grok.name("queue-message")
     grok.context(Interface)
 
-    schema = IMessageForm
+    schema = IQueueForm
     ignoreContext = True
 
     label = _(u"Queue Message")
@@ -83,21 +128,71 @@ class MessageForm(form.SchemaForm):
     @button.buttonAndHandler(_(u"Send"))
     def queueMessage(self, action):
         data, errors = self.extractData()
-        site = getUtility(ISiteRoot)
 
-        producer = getUtility(IProducer, name="amqpdemo.message")
+        producer = getUtility(IProducer, name="amqpdemo.queue")
+        producer._register()  # register for transaction
         producer.publish(data["message"])
-        producer.publish(data["message"])  # publish twice to increment count
+
+        IStatusMessage(self.request).addStatusMessage(
+                       u"Queued: %s" % data["message"],
+                       "info")
+
+
+class PurgeView(grok.View):
+    """Purge queue view"""
+    grok.name("purge-queue")
+    grok.context(Interface)
+
+    def update(self):
+        producer = getUtility(IProducer, name="amqpdemo.purge")
+        producer._register()  # register for transaction
+        producer.publish(u"")  # empty message :)
+
+        IStatusMessage(self.request).addStatusMessage(
+                       u"Purge requested",
+                       "info")
+
+        self.request.response.redirect(self.context.absolute_url())
+
+    def render(self):
+        return u""
+
+
+@grok.subscribe(IPurge, IMessageArrivedEvent)
+def purgeQueue(message, event):
+    site = getUtility(ISiteRoot)
+
+    logger.info("Starting to purge amqpdemo.%s.queue" % site.getId())
+
+    consumer = getUtility(
+        IConsumer, name="amqpdemo.%s.queue" % site.getId())
+    # basic_get sets its response callback in a way that is NOT
+    # thread-safe; therefore basic_get is safe to be used only via
+    # a ConsumingServer in a single-threaded ZEO client
+    consumer._channel.basic_get(
+        consumer.on_message_received,
+        queue=consumer.queue)
+
+    message.ack()
+
+
+@grok.subscribe(IMessage, IMessageArrivedEvent)
+def logMessage(message, event):
+    logger.info("Purged: %s" % message.body)
+
+    site = getUtility(ISiteRoot)
+
+    count = message.method_frame.message_count
+    if count:
+        logger.info("Messages left: %s", count)
 
         consumer = getUtility(
-            IConsumer, name="amqpdemo.%s.message" % site.getId())
+            IConsumer, name="amqpdemo.%s.queue" % site.getId())
+        # basic_get sets its response callback in a way that is NOT
+        # thread-safe; therefore basic_get is safe to be used only via
+        # a ConsumingServer in a single-threaded ZEO client
         consumer._channel.basic_get(
             consumer.on_message_received,
             queue=consumer.queue)
 
-
-@grok.subscribe(IMessage, IMessageArrivedEvent)
-def handleMessage(message, event):
-    logger.info(message.body)
-    logger.info("Messages left: %s", message.method_frame.message_count)
     message.ack()
