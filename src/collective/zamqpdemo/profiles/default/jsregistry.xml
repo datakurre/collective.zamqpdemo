@@ -14,6 +14,6 @@
         id="++resource++collective.zamqpdemo/notifications.js"
         cacheable="True" compression="full" cookable="True"
         enabled="True" inline="False" expression=""
-        insert-after="++resource++collective.zamqpdemo/sockjs.js" />
+        insert-after="++resource++collective.zamqpdemo/stomp.js" />
 </object>
 
