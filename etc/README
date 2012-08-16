@@ -1,0 +1,11 @@
+rabbitmq-env.conf
+    RabbitMQ environment configuration file for *rod.recipe.rabbitmq*
+    and usually meaningful only for development environment
+
+rabbit-plugins
+    RabbitMQ plugins file to enable certain plugins when using
+    *rod.recipe.rabbitmq* and the rabbitmq-env.conf above
+
+rabbitmq.config
+    RabbitMQ configuration (or database initialization) file when using
+    *rod.recipe.rabbitmq* and the rabbitmq-env.conf above
