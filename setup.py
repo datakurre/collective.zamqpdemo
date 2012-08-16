@@ -30,6 +30,7 @@ setup(name="collective.zamqpdemo",
 
           "collective.zamqp",
           "msgpack-python",
+          "simplejson",
 
           "xhtml2pdf",
           "chameleon",
