@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<object name="portal_javascripts" meta_type="JavaScripts Registry">
+    <javascript
+        id="++resource++collective.zamqpdemo/sockjs.js"
+        cacheable="True" compression="full" cookable="True"
+        enabled="True" inline="False" expression=""
+        insert-after="++resource++plone.app.jquerytools.form.js" />
+    <javascript
+        id="++resource++collective.zamqpdemo/stomp.js"
+        cacheable="True" compression="full" cookable="True"
+        enabled="True" inline="False" expression=""
+        insert-after="++resource++collective.zamqpdemo/sockjs.js" />
+    <javascript
+        id="++resource++collective.zamqpdemo/notifications.js"
+        cacheable="True" compression="full" cookable="True"
+        enabled="True" inline="False" expression=""
+        insert-after="++resource++collective.zamqpdemo/sockjs.js" />
+</object>
+

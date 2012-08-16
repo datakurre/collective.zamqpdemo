@@ -1,0 +1,15 @@
+.amqp-notification {
+    position: absolute;
+    top: 1em; right: 1em;
+    padding: 1em;
+    z-index: 9999;
+
+    background: #404040;
+    color: #ffffff;
+
+    border-radius: 1ex;
+}
+
+.amqp-notification a {
+     color: #d0d0f0;
+}
