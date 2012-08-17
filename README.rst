@@ -15,8 +15,7 @@ and only then your Plone::
 
     $ bin/instance fg
 
-You can follow the rabbit with login username *amqpdemo* and password
-*amqpdemo* at::
+You can follow the rabbit with login username *guest* and password *guest* at::
 
     http://localhost:55672/mgmt/
 
