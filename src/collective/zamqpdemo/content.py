@@ -48,11 +48,10 @@ class CreateItemProducer(Producer):
     """Produces item creation requests"""
     grok.name("amqpdemo.create")  # is also the routing key
 
-    connection_id = "amqpdemo"
-    exchange = "amqpdemo"
+    connection_id = "demo"
     serializer = "msgpack"
+    queue = "amqpdemo.create"
 
-    auto_declare = True
     durable = False
 
 
@@ -60,11 +59,10 @@ class DeleteItemProducer(Producer):
     """Produces item deletion requests"""
     grok.name("amqpdemo.delete")  # is also the routing key
 
-    connection_id = "amqpdemo"
-    exchange = "amqpdemo"
+    connection_id = "demo"
     serializer = "msgpack"
+    queue = "amqpdemo.delete"
 
-    auto_declare = True
     durable = False
 
 
@@ -72,26 +70,20 @@ class CreateItemConsumer(Consumer):
     """Consumes item creation messages"""
     grok.name("amqpdemo.create")  # is also the queue name
 
-    connection_id = "amqpdemo"
-    exchange = "amqpdemo"
-
-    auto_declare = True
-    durable = False
-
+    connection_id = "demo"
     marker = ICreateItemMessage
+
+    durable = False
 
 
 class DeleteItemConsumer(Consumer):
     """Consumes item deletion messages"""
     grok.name("amqpdemo.delete")  # is also the queue name
 
-    connection_id = "amqpdemo"
-    exchange = "amqpdemo"
-
-    auto_declare = True
-    durable = False
-
+    connection_id = "demo"
     marker = IDeleteItemMessage
+
+    durable = False
 
 
 class CreateAndDeleteViewlet(grok.Viewlet):
@@ -113,6 +105,24 @@ class CreateAndDelete(grok.View):
         kwargs = {"title": title}
 
         producer.publish(kwargs, correlation_id=IUUID(self.context))
+
+        self.request.response.redirect(self.context.absolute_url())
+
+
+class CreateManyAndDelete(grok.View):
+    """Item creation request view"""
+    grok.context(IContainer)
+    grok.name("create-many-and-delete")
+
+    def render(self):
+        producer = getUtility(IProducer, name="amqpdemo.create")
+        producer._register()
+
+        title = str(uuid.uuid4())
+
+        for i in range(5):
+            kwargs = {"title": "%s-%s" % (title, i + 1)}
+            producer.publish(kwargs, correlation_id=IUUID(self.context))
 
         self.request.response.redirect(self.context.absolute_url())
 

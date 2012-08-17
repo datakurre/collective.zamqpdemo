@@ -8,7 +8,7 @@ jQuery ($) ->
   # Declare subscriptions and handlers for them
   on_connect = (response) ->
     console?.log "on_connect #{response}"
-    id = client.subscribe "/exchange/amqpdemo.notifications/*", (message) ->
+    id = client.subscribe "/topic/notifications", (message) ->
       console?.log "on_message #{message}"
       data = $.parseJSON(message.body)
       el = $("<p class=\"amqp-notification\">Just published:<br/>" \
@@ -21,4 +21,4 @@ jQuery ($) ->
     console?.log "on_error #{response}"
 
   # Connect!
-  client.connect "amqpdemo", "amqpdemo", on_connect, on_error, "/amqpdemo"
+  client.connect "guest", "guest", on_connect, on_error, "/"

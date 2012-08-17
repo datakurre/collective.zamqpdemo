@@ -37,11 +37,9 @@ class QueueMessageProducer(Producer):
     """Produces queue message command"""
     grok.name("amqpdemo.queue")
 
-    connection_id = "amqpdemo"
-    exchange = "amqpdemo"
-    serializer = "text/plain"
+    connection_id = "demo"
+    serializer = "plain"
 
-    auto_declare = True
     durable = False
 
     @property
@@ -57,11 +55,9 @@ class PurgeQueueProducer(Producer):
     """Produces purge queue command"""
     grok.name("amqpdemo.purge")
 
-    connection_id = "amqpdemo"
-    exchange = "amqpdemo"
-    serializer = "text/plain"
+    connection_id = "demo"
+    serializer = "plain"
 
-    auto_declare = True
     durable = False
 
     @property
@@ -77,26 +73,20 @@ class PurgeQueueConsumer(Consumer):
     """Consumes purge-requests"""
     grok.name("amqpdemo.${site_id}.purge")  # is also the queue name
 
-    connection_id = "amqpdemo"
-    exchange = "amqpdemo"
-
-    auto_declare = True
-    durable = False
-
+    connection_id = "demo"
     marker = IPurge
+
+    durable = False
 
 
 class MessageConsumer(Consumer):
     """Consumes purge-requests"""
     grok.name("amqpdemo.${site_id}.queue")  # is also the queue name
 
-    connection_id = "amqpdemo"
-    exchange = "amqpdemo"
-
-    auto_declare = True
-    durable = False
-
+    connection_id = "demo"
     marker = IMessage
+
+    durable = False
 
     def on_ready_to_consume(self):
         pass  # overrided to disable auto-consuming
@@ -172,6 +162,9 @@ def purgeQueue(message, event):
     consumer._channel.basic_get(
         consumer.on_message_received,
         queue=consumer.queue)
+    # XXX: We are going to avoid this in the future by providing an easy
+    # way to create temporary synchronous connections: no more basic gets
+    # in the main process thread...
 
     message.ack()
 
@@ -194,5 +187,8 @@ def logMessage(message, event):
         consumer._channel.basic_get(
             consumer.on_message_received,
             queue=consumer.queue)
+        # XXX: We are going to avoid this in the future by providing an easy
+        # way to create temporary synchronous connections: no more basic gets
+        # in the main process thread...
 
     message.ack()

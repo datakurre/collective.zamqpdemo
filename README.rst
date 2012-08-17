@@ -6,7 +6,7 @@ configuring and using AMQP-messaging with Plone and
 `collective.zamqp <http://github.com/datakurre/collective.zamqp/>`_
 (with or without ZEO-clustering).
 
-After running the buildout, you must start RabbitMQ by ::
+After running the buildout, you must start RabbitMQ by::
 
     $ source bin/rabbitmq-env
     $ bin/rabbitmq-server
@@ -14,9 +14,6 @@ After running the buildout, you must start RabbitMQ by ::
 and only then your Plone::
 
     $ bin/instance fg
-
-RabbitMQ is initialized automatically for the demos using
-``./etc/rabbit.config`` found within the buildout.
 
 You can follow the rabbit with login username *amqpdemo* and password
 *amqpdemo* at::
@@ -31,3 +28,9 @@ of *collective.zamqp* with::
 
 This initialize the AMQP-connections only after reload and eases hacking with
 AMQP message consumers and producers.
+
+**Note:**
+If you have tried these demos before and have not cleared your buildout,
+you might have to reset RabbitMQ by removing *./var/rabbitmq*. That's
+because the demos have been simplified to use AMQP default virtualhost,
+credentials and exchanges.

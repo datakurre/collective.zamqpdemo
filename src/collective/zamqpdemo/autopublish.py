@@ -36,20 +36,17 @@ class AutoPublishProducer(Producer):
     """Produces auto-publishing requests"""
     grok.name("amqpdemo.autopublish")
 
-    connection_id = "amqpdemo"
-    exchange = "amqpdemo"
-    serializer = "text/plain"
+    connection_id = "demo"
+    serializer = "plain"
 
     queue = "amqpdemo.autopublish.wait"
     queue_arguments = {
-        "x-dead-letter-exchange": "amqpdemo",
+        "x-dead-letter-exchange": "",
         "x-dead-letter-routing-key": "amqpdemo.autopublish",
         "x-message-ttl": 60000,  # 60s poll for autopublish
         }
+    routing_key = "amqpdemo.autopublish.wait"
 
-    routing_key = "amqpdemo.autopublish.wait"  # also binds the declared queue
-
-    auto_declare = True
     durable = False
 
 
@@ -57,13 +54,10 @@ class AutoPublishConsumer(Consumer):
     """Consumes auto-publishing requests"""
     grok.name("amqpdemo.autopublish")  # is also the queue name
 
-    connection_id = "amqpdemo"
-    exchange = "amqpdemo"
-
-    auto_declare = True
-    durable = False
-
+    connection_id = "demo"
     marker = IAutoPublishMessage
+
+    durable = False
 
 
 def publishOrWait(context):

@@ -25,24 +25,17 @@ class NotificationProducer(Producer):
     """Produces instant notification on published documents"""
     grok.name("amqpdemo.notifications")
 
-    connection_id = "amqpdemo"
-    exchange = "amqpdemo.notifications"
-    exchange_type = "fanout"
-    exchange_declare = True
-    serializer = "text/plain"
-    routing_key = "*"
-
-    auto_declare = True
-    durable = False
+    connection_id = "demo"
+    exchange = "amq.topic"
+    routing_key = "notifications"
+    serializer = "json"
 
 
 @grok.subscribe(Interface, IActionSucceededEvent)
 def workflowActionSucceeded(context, event):
     if getattr(event, "action") == "publish":
-        payload = {
+        notifications = getUtility(IProducer, name="amqpdemo.notifications")
+        notifications.publish({
             "url": context.absolute_url(),
             "title": context.title_or_id()
-        }
-        notifications = getUtility(IProducer, name="amqpdemo.notifications")
-        notifications._register()
-        notifications.publish(json.dumps(payload))
+        })

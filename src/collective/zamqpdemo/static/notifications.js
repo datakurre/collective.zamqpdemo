@@ -10,7 +10,7 @@
       if (typeof console !== "undefined" && console !== null) {
         console.log("on_connect " + response);
       }
-      return id = client.subscribe("/exchange/amqpdemo.notifications/*", function(message) {
+      return id = client.subscribe("/topic/notifications", function(message) {
         var data, el;
         if (typeof console !== "undefined" && console !== null) {
           console.log("on_message " + message);
@@ -26,7 +26,7 @@
     on_error = function(response) {
       return typeof console !== "undefined" && console !== null ? console.log("on_error " + response) : void 0;
     };
-    return client.connect("amqpdemo", "amqpdemo", on_connect, on_error, "/amqpdemo");
+    return client.connect("guest", "guest", on_connect, on_error, "/");
   });
 
 }).call(this);
