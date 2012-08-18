@@ -17,6 +17,7 @@ from collective.zamqp.interfaces import IProducer, IConsumer
 from collective.zamqp.interfaces import IMessageArrivedEvent
 from collective.zamqp.producer import Producer
 from collective.zamqp.consumer import Consumer
+from collective.zamqp.connection import BlockingChannel
 
 from zope.i18nmessageid import MessageFactory as ZopeMessageFactory
 _ = ZopeMessageFactory("collective.zamqpdemo")
@@ -25,19 +26,16 @@ import logging
 logger = logging.getLogger("collective.zamqpdemo")
 
 
-class IPurge(Interface):
-    """Purge command marker interface"""
-
-
 class IMessage(Interface):
     """Message marker interface"""
 
 
 class QueueMessageProducer(Producer):
     """Produces queue message command"""
-    grok.name("amqpdemo.queue")
+    grok.name("amqpdemo.messages")
 
     connection_id = "demo"
+    exchange = "awaiting"
     serializer = "plain"
 
     durable = False
@@ -46,50 +44,41 @@ class QueueMessageProducer(Producer):
     def routing_key(self):
         site = queryUtility(ISiteRoot)
         if site:
-            return "amqpdemo.%s.queue" % site.getId()
+            return "amqpdemo.%s.messages" % site.getId()
         else:
-            return "amqpdemo.queue"
+            return "amqpdemo.${site}.messages"
 
 
-class PurgeQueueProducer(Producer):
-    """Produces purge queue command"""
-    grok.name("amqpdemo.purge")
-
-    connection_id = "demo"
-    serializer = "plain"
-
-    durable = False
-
-    @property
-    def routing_key(self):
-        site = queryUtility(ISiteRoot)
-        if site:
-            return "amqpdemo.%s.purge" % site.getId()
-        else:
-            return "amqpdemo.purge"
-
-
-class PurgeQueueConsumer(Consumer):
+class AwaitingMessages(Consumer):
     """Consumes purge-requests"""
-    grok.name("amqpdemo.${site_id}.purge")  # is also the queue name
+    grok.name("amqpdemo.${site_id}.awaiting")  # is also the queue name
 
     connection_id = "demo"
-    marker = IPurge
-
-    durable = False
-
-
-class MessageConsumer(Consumer):
-    """Consumes purge-requests"""
-    grok.name("amqpdemo.${site_id}.queue")  # is also the queue name
-
-    connection_id = "demo"
+    exchange = "awaiting"
+    queue_arguments = {
+        "x-dead-letter-exchange": "messages",  # redirect messages with reject
+    }
+    routing_key = "amqpdemo.${site_id}.messages"
     marker = IMessage
 
     durable = False
 
     def on_ready_to_consume(self):
         pass  # overrided to disable auto-consuming
+              # we need this consumer to declare a site-specific queue
+
+
+class MessageConsumer(Consumer):
+    """Consumes purge-requests"""
+    grok.name("amqpdemo.${site_id}.messages")  # is also the queue name
+
+    connection_id = "demo"
+    exchange = "messages"
+    queue = ""  # use generated queue name
+    routing_key = "amqpdemo.${site_id}.messages"
+    marker = IMessage
+
+    durable = False
 
 
 class IQueueForm(form.Schema):
@@ -119,7 +108,7 @@ class MessageForm(form.SchemaForm):
     def queueMessage(self, action):
         data, errors = self.extractData()
 
-        producer = getUtility(IProducer, name="amqpdemo.queue")
+        producer = getUtility(IProducer, name="amqpdemo.messages")
         producer._register()  # register for transaction
         producer.publish(data["message"])
 
@@ -134,9 +123,15 @@ class PurgeView(grok.View):
     grok.context(Interface)
 
     def update(self):
-        producer = getUtility(IProducer, name="amqpdemo.purge")
-        producer._register()  # register for transaction
-        producer.publish(u"")  # empty message :)
+        site = getUtility(ISiteRoot)
+        queue = "amqpdemo.%s.awaiting" % site.getId()
+        messages = len(getUtility(IConsumer, name=queue))
+        if messages:
+            with BlockingChannel("demo") as channel:
+                method, properties, body = channel.basic_get(queue=queue)
+                if properties and body:  # quick test for Basic.GetOk
+                    channel.basic_reject(delivery_tag=method.delivery_tag,
+                                         requeue=False)
 
         IStatusMessage(self.request).addStatusMessage(
                        u"Purge requested",
@@ -148,47 +143,18 @@ class PurgeView(grok.View):
         return u""
 
 
-@grok.subscribe(IPurge, IMessageArrivedEvent)
-def purgeQueue(message, event):
-    site = getUtility(ISiteRoot)
-
-    logger.info("Starting to purge amqpdemo.%s.queue" % site.getId())
-
-    consumer = getUtility(
-        IConsumer, name="amqpdemo.%s.queue" % site.getId())
-    # basic_get sets its response callback in a way that is NOT
-    # thread-safe; therefore basic_get is safe to be used only via
-    # a ConsumingServer in a single-threaded ZEO client
-    consumer._channel.basic_get(
-        consumer.on_message_received,
-        queue=consumer.queue)
-    # XXX: We are going to avoid this in the future by providing an easy
-    # way to create temporary synchronous connections: no more basic gets
-    # in the main process thread...
-
-    message.ack()
-
-
 @grok.subscribe(IMessage, IMessageArrivedEvent)
 def logMessage(message, event):
     logger.info("Purged: %s" % message.body)
 
     site = getUtility(ISiteRoot)
-
-    count = message.method_frame.message_count
-    if count:
-        logger.info("Messages left: %s", count)
-
-        consumer = getUtility(
-            IConsumer, name="amqpdemo.%s.queue" % site.getId())
-        # basic_get sets its response callback in a way that is NOT
-        # thread-safe; therefore basic_get is safe to be used only via
-        # a ConsumingServer in a single-threaded ZEO client
-        consumer._channel.basic_get(
-            consumer.on_message_received,
-            queue=consumer.queue)
-        # XXX: We are going to avoid this in the future by providing an easy
-        # way to create temporary synchronous connections: no more basic gets
-        # in the main process thread...
-
+    queue = "amqpdemo.%s.awaiting" % site.getId()
+    messages = len(getUtility(IConsumer, name=queue))
+    logger.info("Messages left: %s", messages)
+    if messages:
+        with BlockingChannel("demo") as channel:
+            method, properties, body = channel.basic_get(queue=queue)
+            if properties and body:  # quick test for Basic.GetOk
+                channel.basic_reject(delivery_tag=method.delivery_tag,
+                                     requeue=False)
     message.ack()
