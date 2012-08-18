@@ -114,6 +114,9 @@ class CreateManyAndDelete(grok.View):
     grok.context(IContainer)
     grok.name("create-many-and-delete")
 
+    ## Use with Apache benchmark to test your setup r/w concurrency :)
+    # ab -n 10 -c 4 http://127.0.0.1:8081/Plone/test/@@create-many-and-delete
+
     def render(self):
         producer = getUtility(IProducer, name="amqpdemo.create")
         producer._register()

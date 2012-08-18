@@ -14,6 +14,13 @@
          i18n:name="link">@@create-and-delete</a>
       for this container to initiate an AMQP-sequence.
   </dd>
+  <dt i18n:domain="plone" i18n:translate="">Info</dt>
+  <dd i18n:translate="">
+      Call
+      <a tal:attributes="href string:${context/absolute_url}/@@create-many-and-delete"
+         i18n:name="link">@@create-many-and-delete</a>
+      for this container to do that five (5) times.
+  </dd>
 </dl>
 
 </body>
