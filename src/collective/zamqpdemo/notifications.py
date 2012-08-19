@@ -1,12 +1,6 @@
 # -*- coding: utf-8 -*-
 """Instant publishing notifications for all via web-stomp"""
 
-try:
-    import json
-    json  # pyflakes
-except ImportError:
-    import simplejson as json
-
 from five import grok
 
 from zope.interface import Interface
