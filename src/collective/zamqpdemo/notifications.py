@@ -59,6 +59,10 @@ class ConfigureMemberExchange(grok.View):
         if mtool.isAnonymousUser():
             return u"null"
 
+        # For basic auth authenticated users, return 'null'
+        if not "__ac" in self.request.cookies:
+            return u"null"
+
         member = mtool.getAuthenticatedMember()
 
         member_exchange = md5()
