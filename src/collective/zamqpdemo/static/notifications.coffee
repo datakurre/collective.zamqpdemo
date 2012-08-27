@@ -15,6 +15,13 @@ jQuery ($) ->
     expires = "; expires=" + date.toGMTString()
     document.cookie = "exchange=" + value + expires + "; path=/"
 
+  # Define helper for removing the member exchange cookie
+  clearMemberExchange = ->
+    date = new Date()
+    date.setTime(date.getTime() - (24 * 60 * 60 * 1000))
+    expires = "; expires=" + date.toGMTString()
+    document.cookie = "exchange=" + expires + "; path=/"
+
   # Define helper method to add new notification
   addNotification = (html) ->
     container = $("#amqp-notifications")
@@ -125,6 +132,7 @@ jQuery ($) ->
   if not authenticated
     console?.log "CONNECT GUEST"
     do connect_guest
+    do clearMemberExchange
   else if not member_exchange
     do authenticate
   else

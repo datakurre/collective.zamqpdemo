@@ -2,7 +2,7 @@
 (function() {
 
   jQuery(function($) {
-    var addNotification, authenticate, authenticated, client, connect_guest, connect_member, getMemberExchange, member_exchange, on_connect_auth, on_connect_guest, on_connect_member, on_error_auth, on_error_guest, on_error_member, setMemberExchange;
+    var addNotification, authenticate, authenticated, clearMemberExchange, client, connect_guest, connect_member, getMemberExchange, member_exchange, on_connect_auth, on_connect_guest, on_connect_member, on_error_auth, on_error_guest, on_error_member, setMemberExchange;
     getMemberExchange = function() {
       var c, key, _i, _len, _ref;
       key = "exchange=";
@@ -24,6 +24,13 @@
       date.setTime(date.getTime() + (24 * 60 * 60 * 1000));
       expires = "; expires=" + date.toGMTString();
       return document.cookie = "exchange=" + value + expires + "; path=/";
+    };
+    clearMemberExchange = function() {
+      var date, expires;
+      date = new Date();
+      date.setTime(date.getTime() - (24 * 60 * 60 * 1000));
+      expires = "; expires=" + date.toGMTString();
+      return document.cookie = "exchange=" + expires + "; path=/";
     };
     addNotification = function(html) {
       var container, notification;
@@ -137,7 +144,8 @@
       if (typeof console !== "undefined" && console !== null) {
         console.log("CONNECT GUEST");
       }
-      return connect_guest();
+      connect_guest();
+      return clearMemberExchange();
     } else if (!member_exchange) {
       return authenticate();
     } else {
