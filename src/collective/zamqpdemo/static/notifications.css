@@ -1,8 +1,13 @@
-.amqp-notification {
+#amqp-notifications {
     position: absolute;
-    top: 1em; right: 1em;
-    padding: 1em;
+    top: 0; right: 0;
+    width: 20em;
     z-index: 9999;
+}
+
+#amqp-notifications .amqp-notification {
+    margin: 1em;
+    padding: 1em;
 
     background: #404040;
     color: #ffffff;
@@ -10,6 +15,16 @@
     border-radius: 1ex;
 }
 
-.amqp-notification a {
+#amqp-notifications .amqp-notification a {
      color: #d0d0f0;
+}
+
+#amqp-notifications .amqp-notification ul,
+#amqp-notifications .amqp-notification li {
+     display: block;
+}
+
+#amqp-notifications .amqp-notification ul li {
+     margin-top: 1em;
+     padding-left: 1em;
 }
