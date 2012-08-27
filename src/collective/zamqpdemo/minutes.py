@@ -78,7 +78,7 @@ class MinutesProducer(Producer):
     """Produces requests for PDF"""
     grok.name("amqpdemo.minutes")  # is also the routing key
 
-    connection_id = "demo"
+    connection_id = "superuser"
     queue = "amqpdemo.minutes"
     serializer = "plain"
 
@@ -89,7 +89,7 @@ class MinutesConsumer(Consumer):
     """Consumes requests for PDF"""
     grok.name("amqpdemo.minutes")  # is also the queue name
 
-    connection_id = "demo"
+    connection_id = "superuser"
     marker = IMinutesMessage
 
     durable = False

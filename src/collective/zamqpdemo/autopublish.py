@@ -36,7 +36,7 @@ class AutoPublishProducer(Producer):
     """Produces auto-publishing requests"""
     grok.name("amqpdemo.autopublish")
 
-    connection_id = "demo"
+    connection_id = "superuser"
     serializer = "plain"
 
     queue = "amqpdemo.autopublish.wait"
@@ -54,7 +54,7 @@ class AutoPublishConsumer(Consumer):
     """Consumes auto-publishing requests"""
     grok.name("amqpdemo.autopublish")  # is also the queue name
 
-    connection_id = "demo"
+    connection_id = "superuser"
     marker = IAutoPublishMessage
 
     durable = False

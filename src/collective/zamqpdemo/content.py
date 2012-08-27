@@ -48,7 +48,7 @@ class CreateItemProducer(Producer):
     """Produces item creation requests"""
     grok.name("amqpdemo.create")  # is also the routing key
 
-    connection_id = "demo"
+    connection_id = "superuser"
     serializer = "msgpack"
     queue = "amqpdemo.create"
 
@@ -59,7 +59,7 @@ class DeleteItemProducer(Producer):
     """Produces item deletion requests"""
     grok.name("amqpdemo.delete")  # is also the routing key
 
-    connection_id = "demo"
+    connection_id = "superuser"
     serializer = "msgpack"
     queue = "amqpdemo.delete"
 
@@ -70,7 +70,7 @@ class CreateItemConsumer(Consumer):
     """Consumes item creation messages"""
     grok.name("amqpdemo.create")  # is also the queue name
 
-    connection_id = "demo"
+    connection_id = "superuser"
     marker = ICreateItemMessage
 
     durable = False
@@ -80,7 +80,7 @@ class DeleteItemConsumer(Consumer):
     """Consumes item deletion messages"""
     grok.name("amqpdemo.delete")  # is also the queue name
 
-    connection_id = "demo"
+    connection_id = "superuser"
     marker = IDeleteItemMessage
 
     durable = False

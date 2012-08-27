@@ -34,10 +34,11 @@ class QueueMessageProducer(Producer):
     """Produces queue message command"""
     grok.name("amqpdemo.messages")
 
-    connection_id = "demo"
+    connection_id = "superuser"
     exchange = "awaiting"
     serializer = "plain"
 
+    auto_delete = False
     durable = False
 
     @property
@@ -53,7 +54,7 @@ class AwaitingMessages(Consumer):
     """Consumes purge-requests"""
     grok.name("amqpdemo.${site_id}.awaiting")  # is also the queue name
 
-    connection_id = "demo"
+    connection_id = "superuser"
     exchange = "awaiting"
     queue_arguments = {
         "x-dead-letter-exchange": "messages",  # redirect messages with reject
@@ -61,6 +62,7 @@ class AwaitingMessages(Consumer):
     routing_key = "amqpdemo.${site_id}.messages"
     marker = IMessage
 
+    auto_delete = False
     durable = False
 
     def on_ready_to_consume(self):
@@ -72,7 +74,7 @@ class MessageConsumer(Consumer):
     """Consumes purge-requests"""
     grok.name("amqpdemo.${site_id}.messages")  # is also the queue name
 
-    connection_id = "demo"
+    connection_id = "superuser"
     exchange = "messages"
     queue = ""  # use generated queue name
     routing_key = "amqpdemo.${site_id}.messages"
