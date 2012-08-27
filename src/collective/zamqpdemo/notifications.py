@@ -78,13 +78,24 @@ class ConfigureMemberExchange(grok.View):
             channel.__class__.__bases__[0].__bases__ = (DriverMixin,)
             ###
 
-            channel.exchange_declare(exchange=member_exchange,
-                                     type="fanout",
-                                     auto_delete=True,
-                                     durable=False)
+            # We must declare and bind member specific exchange, because the
+            # member may have multiple browser tab/window connected and
+            # everyone of them should get all the messages.
+            channel.exchange_declare(exchange=member_exchange, type="fanout",
+                                     auto_delete=True, durable=False)
             channel.exchange_bind(source="amq.direct",
                                   destination=member_exchange,
                                   routing_key=str(member.getId()))
+
+            # Yet, because exchange with auto_delete=True will self-destroy
+            # immediately after the last connected queue has been disconnected,
+            # we need special keepalive queue to keep the exchange alive while
+            # the user moves from one page to another.
+            channel.queue_declare(queue="%s-keepalive" % member_exchange,
+                                  auto_delete=False, durable=False,
+                                  arguments={"x-expires": 10000})
+            channel.queue_bind(queue="%s-keepalive" % member_exchange,
+                               exchange=member_exchange, routing_key="*")
 
             if can_review:
                 channel.exchange_bind(source="reviewers",
@@ -126,6 +137,6 @@ def workflowActionSucceeded(context, event):
         notifications = getUtility(IProducer, name="superuser")
         notifications._register()
         notifications.publish("""\
-<p>Submission rejected: <a href="%s">%s</a></p>""" % (
+<p>Submission rejected:<br/> <a href="%s">%s</a></p>""" % (
     event.object.absolute_url(), event.object.title_or_id()),
     exchange="amq.direct", routing_key=creator, serializer="text/plain")

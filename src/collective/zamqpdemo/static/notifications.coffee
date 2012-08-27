@@ -79,6 +79,10 @@ jQuery ($) ->
       else
         addNotification message.body
 
+    # Subscribe keepalive-queue to keep the member exchange alive
+    client.subscribe "/amq/queue/#{member_exchange}-keepalive", (message) ->
+      null
+
   on_error_member = (response) ->
     console?.log "on_error #{response}"
     if new RegExp("no exchange '#{member_exchange}'").test response

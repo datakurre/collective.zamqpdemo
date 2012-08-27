@@ -61,7 +61,7 @@
     };
     on_connect_member = function(response) {
       on_connect_guest(response);
-      return client.subscribe("/exchange/" + member_exchange + "/*", function(message) {
+      client.subscribe("/exchange/" + member_exchange + "/*", function(message) {
         var actions, data, key, value, _ref;
         if (typeof console !== "undefined" && console !== null) {
           console.log("on_message " + message);
@@ -85,6 +85,9 @@
         } else {
           return addNotification(message.body);
         }
+      });
+      return client.subscribe("/amq/queue/" + member_exchange + "-keepalive", function(message) {
+        return null;
       });
     };
     on_error_member = function(response) {
