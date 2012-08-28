@@ -3,6 +3,13 @@
 
   jQuery(function($) {
     var addNotification, authenticate, authenticated, clearMemberExchange, client, connect_guest, connect_member, getMemberExchange, member_exchange, on_connect_auth, on_connect_guest, on_connect_member, on_error_auth, on_error_guest, on_error_member, setMemberExchange;
+    setMemberExchange = function(value) {
+      var date, expires;
+      date = new Date();
+      date.setTime(date.getTime() + (24 * 60 * 60 * 1000));
+      expires = "; expires=" + date.toGMTString();
+      return document.cookie = "exchange=" + value + expires + "; path=/";
+    };
     getMemberExchange = function() {
       var c, key, _i, _len, _ref;
       key = "exchange=";
@@ -17,13 +24,6 @@
         }
       }
       return null;
-    };
-    setMemberExchange = function(value) {
-      var date, expires;
-      date = new Date();
-      date.setTime(date.getTime() + (24 * 60 * 60 * 1000));
-      expires = "; expires=" + date.toGMTString();
-      return document.cookie = "exchange=" + value + expires + "; path=/";
     };
     clearMemberExchange = function() {
       var date, expires;
@@ -46,10 +46,6 @@
       }), 5000);
       return notification.appendTo(container);
     };
-    Stomp.WebSocketClass = SockJS;
-    client = Stomp.client("http://" + window.location.hostname + ":55674/stomp");
-    authenticated = !$("#personaltools-login").length;
-    member_exchange = getMemberExchange();
     on_connect_guest = function(response) {
       if (typeof console !== "undefined" && console !== null) {
         console.log("on_connect " + response);
@@ -116,6 +112,7 @@
         console.log("sending authentication request");
       }
       return $.get("" + portal_url + "/@@configure-member-exchange", function(response) {
+        var member_exchange;
         member_exchange = JSON.parse(response);
         if (member_exchange) {
           setMemberExchange(member_exchange);
@@ -140,6 +137,10 @@
     authenticate = function() {
       return client.connect("guest", "guest", on_connect_auth, on_error_auth, "/");
     };
+    Stomp.WebSocketClass = SockJS;
+    client = Stomp.client("http://" + window.location.hostname + ":55674/stomp");
+    authenticated = !$("#personaltools-login").length;
+    member_exchange = getMemberExchange();
     if (!authenticated) {
       if (typeof console !== "undefined" && console !== null) {
         console.log("CONNECT GUEST");
