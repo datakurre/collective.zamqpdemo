@@ -123,7 +123,7 @@ def workflowActionSucceeded(context, event):
 
     if getattr(event, "action") == "publish":
         notifications = getUtility(IProducer, name="amqpdemo.published")
-        notifications._register()
+        notifications._register()  # register for the current transaction
         notifications.publish({
             "url": event.object.absolute_url(),
             "title": event.object.title_or_id(),
@@ -135,7 +135,7 @@ def workflowActionSucceeded(context, event):
         # security manager for 'Reviewer'. Well, this is a demo after all...
         actions = {"publish": "Publish", "reject": "Reject"}
         notifications = getUtility(IProducer, name="amqpdemo.submitted")
-        notifications._register()
+        notifications._register()  # register for the current transaction
         notifications.publish({
             "url": event.object.absolute_url(),
             "title": event.object.title_or_id(),
@@ -148,7 +148,7 @@ def workflowActionSucceeded(context, event):
         if hasattr(event.object, "Creator"):
             creator = event.object.Creator()
         notifications = getUtility(IProducer, name="superuser")
-        notifications._register()
+        notifications._register()  # register for the current transaction
         notifications.publish(
             "<p>Submission rejected:<br/><a href=\"%s\">%s</a></p>" %
             (event.object.absolute_url(), event.object.title_or_id()),
